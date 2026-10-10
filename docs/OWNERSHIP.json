@@ -1,0 +1,18 @@
+{
+  "track1": ["backend/app/planner/", "backend/app/metrics.py", "backend/app/api/routes_plans.py",
+             "backend/app/api/routes_metrics.py", "backend/tests/test_planner_", "backend/tests/test_metrics_",
+             "data/wordlists.json", "data/profiles.json", "data/test_prompts.csv", "docs/track1/"],
+  "track2": ["backend/app/providers/", "backend/app/pipeline/", "backend/app/api/routes_jobs.py",
+             "backend/tests/test_pipeline_", "backend/tests/test_providers_", "data/library/",
+             "scripts/seed_library.py", "docs/track2/"],
+  "track3": ["frontend/src/", "frontend/public/", "frontend/index.html", "docs/track3/"],
+  "frozen": ["backend/app/schemas.py", "backend/app/store.py", "backend/app/main.py", "backend/app/config.py",
+             "backend/requirements.in", "backend/requirements.lock.txt", "backend/pytest.ini",
+             "backend/tests/test_contract_snapshot.py", "backend/tests/contract_snapshot.json",
+             "backend/tests/test_flow_mock.py", "backend/tests/conftest.py", "backend/tests/make_snapshot.py",
+             "frontend/package.json", "frontend/package-lock.json", "frontend/tsconfig.json",
+             "frontend/vite.config.ts", "frontend/.npmrc", "frontend/src/api/types.ts",
+             ".env.example", ".gitignore", ".gitattributes", ".python-version", ".nvmrc",
+             "scripts/check_env.py", "scripts/setup.ps1", "scripts/verify.ps1", "scripts/check_ownership.py",
+             "docs/OWNERSHIP.json", "README.md", "docs/CONTRACT.md", "docs/TRACKS.md", "docs/INTEGRATION.md"]
+}
