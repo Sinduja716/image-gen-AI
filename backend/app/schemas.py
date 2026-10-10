@@ -73,6 +73,11 @@ class ResourceEstimate(BaseModel):
     saving_percent: float  # compute saved versus maximum quality, 0-100
     measured: bool  # True when `neurons` came from a real provider reading
     placeholder: bool  # True while the neuron table is not yet measured
+    # Second cost measure (constraint: show compute time, energy or an equivalent, plus the saving vs maximum).
+    seconds: float | None = None  # estimated generation time for this image (measured table or actual reading)
+    max_seconds: float | None = None
+    time_saving_percent: float | None = None  # time saved versus maximum quality, 0-100
+    method: str = ""  # one-line "how this was calculated"; full text at GET /api/v1/estimate/method
     notes: list[str] = Field(default_factory=list)
 
 
@@ -141,6 +146,9 @@ class MetricsResponse(BaseModel):
     baseline_neurons: float | None = None
     baseline_cost_usd: float | None = None
     saving_percent: float | None = None
+    seconds_used: float | None = None
+    baseline_seconds: float | None = None
+    time_saving_percent: float | None = None
     energy_wh_used: float | None = None
     baseline_energy_wh: float | None = None
     energy_saved_wh: float | None = None
