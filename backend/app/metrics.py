@@ -18,21 +18,16 @@ def compute_metrics(plan: Plan) -> MetricsResponse:
     base = make_estimate("high")  # one image at maximum quality
 
     used = 0.0
-    secs_used = 0.0
     tier_neurons = 0.0
     tiers: dict[str, int] = {}
 
     for j in done:
         n = 0.0 if j.cache_hit else (j.neurons if j.neurons is not None else (j.estimate.neurons if j.estimate else 0.0))
         used += n
-        # Time comes from the timing table (same source as each page's estimate); a reused page takes 0 s.
-        secs_used += 0.0 if j.cache_hit else (make_estimate(j.tier).seconds or 0.0)
         tier_neurons += make_estimate(j.tier).neurons
         tiers[j.tier] = tiers.get(j.tier, 0) + 1
 
     baseline = base.max_neurons * len(done)
-    baseline_secs = (base.max_seconds or 0.0) * len(done)
-    time_saving = None if baseline_secs <= 0 else round(max(0.0, (1 - secs_used / baseline_secs) * 100), 1)
 
     saving_percent = None
     split_note = None
@@ -68,9 +63,6 @@ def compute_metrics(plan: Plan) -> MetricsResponse:
         baseline_neurons=round(baseline, 3),
         baseline_cost_usd=round(baseline / 1000.0 * USD_PER_1000_NEURONS, 6),
         saving_percent=saving_percent,
-        seconds_used=round(secs_used, 3),
-        baseline_seconds=round(baseline_secs, 3),
-        time_saving_percent=time_saving,
         energy_wh_used=energy_used,
         baseline_energy_wh=energy_base,
         energy_saved_wh=saved_wh,

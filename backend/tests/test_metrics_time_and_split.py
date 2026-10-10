@@ -15,20 +15,19 @@ def _finished_plan(client):
     raise AssertionError("plan did not finish")
 
 
-def test_time_fields_are_filled(client):
+def test_metrics_fields_are_filled(client):
     m = compute_metrics(_finished_plan(client))
-    assert m.seconds_used is not None and m.baseline_seconds
-    assert 0 < m.time_saving_percent < 100  # draft pages are faster than maximum quality
+    assert m.neurons_used is not None and m.baseline_neurons is not None
+    assert 0 <= m.saving_percent <= 100
 
 
-def test_reused_page_counts_zero_seconds_and_zero_neurons(client):
+def test_reused_page_counts_zero_neurons(client):
     plan = _finished_plan(client)
     before = compute_metrics(plan)
     plan.jobs[0].cache_hit = True
     after = compute_metrics(plan)
     assert after.neurons_used < before.neurons_used
-    assert after.seconds_used < before.seconds_used
-    assert after.time_saving_percent > before.time_saving_percent
+    assert after.saving_percent >= before.saving_percent
 
 
 def test_saving_split_note_present_and_adds_up(client):
