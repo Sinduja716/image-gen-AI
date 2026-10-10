@@ -1,6 +1,6 @@
 // TRACK 3 owns src/api/client.ts. All backend calls go through here. Never hard-code provider names or keys.
 import type {
-  ExportResponse, GenerateResponse, GenerationRequest, Job, MetricsResponse, Plan, StatusResponse,
+  EstimateMethod, ExportResponse, GenerateResponse, GenerationRequest, Job, MetricsResponse, Plan, StatusResponse,
 } from "./types";
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
@@ -21,4 +21,5 @@ export const api = {
   exportPdf: (planId: string) => call<ExportResponse>(`/api/v1/plans/${planId}/export`, { method: "POST" }),
   downloadPdfUrl: (planId: string) => `/api/v1/plans/${planId}/download`,
   metrics: (planId: string) => call<MetricsResponse>(`/api/v1/plans/${planId}/metrics`),
+  estimateMethod: () => call<EstimateMethod>("/api/v1/estimate/method"),
 };

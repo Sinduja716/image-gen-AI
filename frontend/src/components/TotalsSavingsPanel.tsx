@@ -75,7 +75,8 @@ export function TotalsSavingsPanel({
   const totalSeconds = allCompletedHaveTiming
     ? (completedJobs.reduce((acc, j) => acc + (j.latency_ms || 0), 0) / 1000).toFixed(2) + "s"
     : "Unavailable";
-  const totalTimeSaved = "Unavailable"; // Baseline timing not recorded in backend contract
+  // time_saving_percent from server metrics; null means no timing baseline available
+  const timeSavingPercent: number | null = serverMetrics?.time_saving_percent ?? null;
 
   // Prefer serverMetrics if provided by backend endpoint
   const finalNeurons = serverMetrics?.neurons_used ?? totalNeurons;
@@ -201,9 +202,15 @@ export function TotalsSavingsPanel({
           <div className="stat-subvalue stat-subvalue-savings">
             Saved: <strong>{totalNeuronsSaved.toFixed(1)} neurons</strong> (${totalCostSaved.toFixed(6)} USD)
           </div>
-          <div className="stat-subvalue stat-energy text-muted">
-            Time saved: {totalTimeSaved} (no timing baseline recorded)
-          </div>
+          {timeSavingPercent != null ? (
+            <div className="stat-subvalue stat-energy">
+              Time saved: <strong>{timeSavingPercent.toFixed(1)}%</strong> vs. maximum baseline
+            </div>
+          ) : (
+            <div className="stat-subvalue stat-energy text-muted">
+              Time saved: Unavailable (no baseline timing recorded)
+            </div>
+          )}
         </div>
       </div>
 

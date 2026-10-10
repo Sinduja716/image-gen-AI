@@ -257,6 +257,10 @@ export function CreateNewPage({ onSessionCreationAdded, online }: CreateNewPageP
       saving_percent: Number(savingPercent.toFixed(1)),
       measured: false,
       placeholder: true,
+      seconds: null,
+      max_seconds: null,
+      time_saving_percent: null,
+      method: "offline-fallback",
       notes: [
         "Offline Fallback: Backend not connected. Values derived from project formulas in app/estimate.py.",
         "Cost computed at $0.011 per 1,000 neurons (Cloudflare paid rate).",
