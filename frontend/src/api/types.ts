@@ -32,6 +32,10 @@ export interface ResourceEstimate {
   saving_percent: number;
   measured: boolean;
   placeholder: boolean;
+  seconds: number | null;
+  max_seconds: number | null;
+  time_saving_percent: number | null;
+  method: string;
   notes: string[];
 }
 export interface Job {
@@ -88,9 +92,23 @@ export interface MetricsResponse {
   baseline_neurons: number | null;
   baseline_cost_usd: number | null;
   saving_percent: number | null;
+  seconds_used: number | null;
+  baseline_seconds: number | null;
+  time_saving_percent: number | null;
   energy_wh_used: number | null;
   baseline_energy_wh: number | null;
   energy_saved_wh: number | null;
   tier_counts: Record<string, number>;
   notes: string[];
+}
+
+export interface EstimateMethod {
+  summary: string;
+  unit: string;
+  maximum_setting: { tier: Tier; steps: number };
+  tiers: { tier: Tier; steps: number; neurons: number; seconds: number }[];
+  formulas: string[];
+  energy: string;
+  measured: boolean;
+  caveats: string[];
 }

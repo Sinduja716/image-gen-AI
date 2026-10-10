@@ -9,7 +9,8 @@
     "data/wordlists.json",
     "data/profiles.json",
     "data/test_prompts.csv",
-    "docs/track1/"
+    "docs/track1/",
+    "docs/ESTIMATION.md"
   ],
   "track2": [
     "backend/app/providers/",
@@ -19,7 +20,8 @@
     "backend/tests/test_providers_",
     "data/library/",
     "scripts/seed_library.py",
-    "docs/track2/"
+    "docs/track2/",
+    "scripts/measure_costs.py"
   ],
   "track3": [
     "frontend/src/",
@@ -60,6 +62,8 @@
     "docs/INTEGRATION.md",
     "backend/app/estimate.py",
     "backend/tests/test_estimate.py",
-    "backend/tests/test_tiers_flow.py"
+    "backend/tests/test_tiers_flow.py",
+    "backend/app/api/routes_estimate.py",
+    "backend/tests/test_estimate_method.py"
   ]
 }

@@ -211,6 +211,18 @@
       "title": "Max Neurons",
       "type": "number"
      },
+     "max_seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Seconds"
+     },
      "max_steps": {
       "title": "Max Steps",
       "type": "integer"
@@ -218,6 +230,11 @@
      "measured": {
       "title": "Measured",
       "type": "boolean"
+     },
+     "method": {
+      "default": "",
+      "title": "Method",
+      "type": "string"
      },
      "neurons": {
       "title": "Neurons",
@@ -238,6 +255,18 @@
       "title": "Saving Percent",
       "type": "number"
      },
+     "seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Seconds"
+     },
      "steps": {
       "title": "Steps",
       "type": "integer"
@@ -250,6 +279,18 @@
       ],
       "title": "Tier",
       "type": "string"
+     },
+     "time_saving_percent": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Time Saving Percent"
      }
     },
     "required": [
@@ -450,6 +491,18 @@
     "default": null,
     "title": "Baseline Neurons"
    },
+   "baseline_seconds": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Baseline Seconds"
+   },
    "cache_hits": {
     "title": "Cache Hits",
     "type": "integer"
@@ -529,12 +582,36 @@
     "default": null,
     "title": "Saving Percent"
    },
+   "seconds_used": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Seconds Used"
+   },
    "tier_counts": {
     "additionalProperties": {
      "type": "integer"
     },
     "title": "Tier Counts",
     "type": "object"
+   },
+   "time_saving_percent": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Time Saving Percent"
    }
   },
   "required": [
@@ -847,6 +924,18 @@
       "title": "Max Neurons",
       "type": "number"
      },
+     "max_seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Seconds"
+     },
      "max_steps": {
       "title": "Max Steps",
       "type": "integer"
@@ -854,6 +943,11 @@
      "measured": {
       "title": "Measured",
       "type": "boolean"
+     },
+     "method": {
+      "default": "",
+      "title": "Method",
+      "type": "string"
      },
      "neurons": {
       "title": "Neurons",
@@ -874,6 +968,18 @@
       "title": "Saving Percent",
       "type": "number"
      },
+     "seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Seconds"
+     },
      "steps": {
       "title": "Steps",
       "type": "integer"
@@ -886,6 +992,18 @@
       ],
       "title": "Tier",
       "type": "string"
+     },
+     "time_saving_percent": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Time Saving Percent"
      }
     },
     "required": [
@@ -1058,6 +1176,18 @@
     "title": "Max Neurons",
     "type": "number"
    },
+   "max_seconds": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Max Seconds"
+   },
    "max_steps": {
     "title": "Max Steps",
     "type": "integer"
@@ -1065,6 +1195,11 @@
    "measured": {
     "title": "Measured",
     "type": "boolean"
+   },
+   "method": {
+    "default": "",
+    "title": "Method",
+    "type": "string"
    },
    "neurons": {
     "title": "Neurons",
@@ -1085,6 +1220,18 @@
     "title": "Saving Percent",
     "type": "number"
    },
+   "seconds": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Seconds"
+   },
    "steps": {
     "title": "Steps",
     "type": "integer"
@@ -1097,6 +1244,18 @@
     ],
     "title": "Tier",
     "type": "string"
+   },
+   "time_saving_percent": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Time Saving Percent"
    }
   },
   "required": [
@@ -1310,6 +1469,18 @@
       "title": "Max Neurons",
       "type": "number"
      },
+     "max_seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Seconds"
+     },
      "max_steps": {
       "title": "Max Steps",
       "type": "integer"
@@ -1317,6 +1488,11 @@
      "measured": {
       "title": "Measured",
       "type": "boolean"
+     },
+     "method": {
+      "default": "",
+      "title": "Method",
+      "type": "string"
      },
      "neurons": {
       "title": "Neurons",
@@ -1337,6 +1513,18 @@
       "title": "Saving Percent",
       "type": "number"
      },
+     "seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Seconds"
+     },
      "steps": {
       "title": "Steps",
       "type": "integer"
@@ -1349,6 +1537,18 @@
       ],
       "title": "Tier",
       "type": "string"
+     },
+     "time_saving_percent": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Time Saving Percent"
      }
     },
     "required": [
