@@ -1,57 +1,52 @@
-// TRACK 3 builds the real UI here. This starter proves the backend connection works.
 import { useEffect, useState } from "react";
 import { api } from "./api/client";
-import type { MaterialType, Plan } from "./api/types";
-
-const BUTTONS: { type: MaterialType; label: string }[] = [
-  { type: "colouring", label: "Colouring page" },
-  { type: "worksheet", label: "Worksheet" },
-  { type: "flashcards", label: "Flashcards" },
-  { type: "poster", label: "Poster" },
-  { type: "thumbnail", label: "Thumbnail / icon" },
-  { type: "auto", label: "Let the system decide" },
-];
+import type { ActivePage, SessionCreation } from "./types/ui";
+import { Header } from "./components/Header";
+import { CreateNewPage } from "./components/CreateNewPage";
+import { MyCreationsPage } from "./components/MyCreationsPage";
 
 export default function App() {
   const [online, setOnline] = useState<boolean | null>(null);
-  const [type, setType] = useState<MaterialType | null>(null);
-  const [prompt, setPrompt] = useState("");
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [activePage, setActivePage] = useState<ActivePage>("create");
+  const [sessionCreations, setSessionCreations] = useState<SessionCreation[]>([]);
 
   useEffect(() => {
-    api.health().then(() => setOnline(true)).catch(() => setOnline(false));
+    // Health check verifying connection to FastAPI backend
+    api.health()
+      .then(() => setOnline(true))
+      .catch(() => setOnline(false));
   }, []);
 
-  async function makePlan() {
-    if (!type || !prompt.trim()) return;
-    try {
-      setError(null);
-      setPlan(await api.createPlan({ material_type: type, prompt }));
-    } catch (e) {
-      setError(String(e));
-    }
-  }
+  const handleAddSessionCreation = (creation: SessionCreation) => {
+    setSessionCreations((prev) => [creation, ...prev.filter((c) => c.planId !== creation.planId)]);
+  };
+
+  const handleUpdateSessionCreation = (updated: SessionCreation) => {
+    setSessionCreations((prev) => prev.map((c) => (c.planId === updated.planId ? updated : c)));
+  };
 
   return (
-    <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>EduCreate AI</h1>
-      <p>Backend: {online === null ? "checking..." : online ? "connected" : "not reachable"}</p>
-      <div style={{ display: "flex", gap: 8 }}>
-        {BUTTONS.map((b) => (
-          <button key={b.type} onClick={() => setType(b.type)} aria-pressed={type === b.type}>
-            {b.label}
-          </button>
-        ))}
-      </div>
-      {type && (
-        <p>
-          <input value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="What do you need?" style={{ width: "70%" }} />{" "}
-          <button onClick={makePlan}>Plan</button>
-        </p>
-      )}
-      {error && <p role="alert">{error}</p>}
-      {plan && <pre>{JSON.stringify(plan, null, 2)}</pre>}
-    </main>
+    <div className="app-container">
+      <Header
+        activePage={activePage}
+        onNavigate={setActivePage}
+        online={online}
+      />
+
+      <main>
+        {activePage === "create" ? (
+          <CreateNewPage
+            onSessionCreationAdded={handleAddSessionCreation}
+            online={online}
+          />
+        ) : (
+          <MyCreationsPage
+            sessionCreations={sessionCreations}
+            onNavigateToCreate={() => setActivePage("create")}
+            onUpdateSessionCreation={handleUpdateSessionCreation}
+          />
+        )}
+      </main>
+    </div>
   );
 }
