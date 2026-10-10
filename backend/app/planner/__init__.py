@@ -82,7 +82,12 @@ def parse_count_and_subjects(prompt: str) -> tuple[int | None, list[str] | None,
             return count, WORDLISTS[category][:count], category
         return count, None, None
 
-    return None, None, None
+    # Check bare categories
+    for category, items in WORDLISTS.items():
+        if category in prompt_lower:
+            return len(items), items, category
+
+    return 1, None, None
 
 def make_plan(req: GenerationRequest) -> Plan:
     purpose, warnings = resolve_purpose(req)
@@ -129,7 +134,10 @@ def make_plan(req: GenerationRequest) -> Plan:
             item_key = f"{category}:{subjects[i-1]}"
             job_prompt = f"{req.prompt} ({subjects[i-1]})"
         else:
-            item_key = f"general:item-{i}"
+            safe_prompt = re.sub(r'[^a-z0-9]+', '-', req.prompt.lower()).strip('-')
+            if not safe_prompt:
+                safe_prompt = "empty"
+            item_key = f"free:{safe_prompt}-{i}"
             job_prompt = f"{req.prompt} (item {i})"
 
         jobs.append(Job(

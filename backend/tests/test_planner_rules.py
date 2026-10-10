@@ -61,3 +61,28 @@ def test_explicit_count_planner():
     assert plan.resolved["count"].value == 3
     assert plan.resolved["count"].source == "planner"
     assert plan.jobs[0].item_key == "colours:red"
+
+
+def test_make_plan_shapes():
+    req = GenerationRequest(material_type=MaterialType.flashcards, prompt="shapes")
+    plan = make_plan(req)
+    assert len(plan.jobs) == 10
+    assert plan.jobs[0].item_key == "shapes:circle"
+
+def test_make_plan_colours():
+    req = GenerationRequest(material_type=MaterialType.flashcards, prompt="colours")
+    plan = make_plan(req)
+    assert len(plan.jobs) == 11
+
+def test_make_plan_fruits_a_to_z():
+    req = GenerationRequest(material_type=MaterialType.worksheet, prompt="fruits A to Z")
+    plan = make_plan(req)
+    assert len(plan.jobs) == 26
+    assert plan.jobs[0].item_key == "fruits:apple"
+
+def test_make_plan_free_text():
+    req = GenerationRequest(material_type=MaterialType.flashcards, prompt="a cheetah and her cub")
+    plan = make_plan(req)
+    assert len(plan.jobs) == 1
+    assert plan.jobs[0].item_key == "free:a-cheetah-and-her-cub-1"
+
