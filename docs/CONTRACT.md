@@ -37,3 +37,14 @@ Only the integrator changes them. `backend/tests/test_contract_snapshot.py` fail
 - Each estimate carries what maximum quality would have used and `saving_percent`. A reused page has 100%.
 - Energy in watt-hours appears only if `ENERGY_WH_PER_1000_NEURONS` is set. Otherwise show relative compute only.
 - Always show `estimate.notes` and mark values with `placeholder: true` as "placeholder".
+
+## Contract v2: cost, time and "how it is calculated" (new constraint)
+
+Constraint: every generation must display its estimated cost (compute time, energy or an equivalent measure)
+next to the saving versus the maximum setting, and the team must explain how the estimate is calculated.
+
+- `ResourceEstimate` gained `seconds`, `max_seconds`, `time_saving_percent` and `method` (one-line formula).
+  Existing fields are unchanged. Built only by `app/estimate.py`.
+- `MetricsResponse` gained `seconds_used`, `baseline_seconds`, `time_saving_percent` (Track 1 fills them).
+- New endpoint `GET /api/v1/estimate/method` returns the full explanation (type `EstimateMethod` in types.ts).
+- Measured tables: `data/library/neurons.json` and `data/library/timings.json` ({"2":..,"4":..,"8":..}).
