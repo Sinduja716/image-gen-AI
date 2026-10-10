@@ -62,3 +62,10 @@ def test_missing_keys(monkeypatch):
     monkeypatch.setattr(settings, "cloudflare_api_token", "")
     with pytest.raises(ProviderError):
         CloudflareFluxProvider().generate("x", 2)
+
+
+def test_nsfw_false_positive_is_classified_filtered():
+    body = {"errors": [{"message": "AiError: Input prompt contains NSFW content.", "code": 8007}], "success": False, "result": {}}
+    with pytest.raises(ProviderError) as e:
+        _provider(lambda q: httpx.Response(400, json=body)).generate("a cat", 2)
+    assert e.value.code == "filtered"

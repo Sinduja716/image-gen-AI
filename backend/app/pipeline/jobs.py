@@ -22,6 +22,17 @@ from app.store import store
 
 RETRYABLE = {"timeout", "server_error"}
 BACKOFF_SECONDS = (1.0, 3.0)
+# Cloudflare's NSFW filter sometimes rejects harmless prompts at random (the same prompt passes on a later try).
+# Retry those with a gentle child-friendly suffix; it is a different prompt each time, so it is not a blind repeat.
+FILTER_RETRIES = 5
+FILTER_SUFFIXES = (
+    "",
+    ", cute, friendly, for a children's picture book",
+    ", child-friendly educational illustration, wholesome",
+    ", simple cartoon for young children, safe for school",
+    ", gentle kindergarten style, cheerful",
+    ", family-friendly clip art style",
+)
 
 
 def _asset_path(job: Job):
@@ -50,15 +61,27 @@ def _lib_key(plan: Plan, job: Job) -> tuple[str, str, str, str]:
 
 def _generate_with_retries(provider, job: Job):
     last: ProviderError | None = None
-    for attempt in range(settings.max_retries + 1):
+    failures = 0       # timeout / server errors
+    filtered = 0       # content-filter false positives
+    while True:
         job.attempts += 1
+        prompt = job.prompt + FILTER_SUFFIXES[min(filtered, len(FILTER_SUFFIXES) - 1)]
         try:
-            return provider.generate(job.prompt, job.steps)
+            return provider.generate(prompt, job.steps)
         except ProviderError as exc:
             last = exc
-            if exc.code not in RETRYABLE or attempt >= settings.max_retries:
+            if exc.code == "filtered":
+                filtered += 1
+                if filtered > FILTER_RETRIES:
+                    break
+                time.sleep(0.5)
+            elif exc.code in RETRYABLE:
+                failures += 1
+                if failures > settings.max_retries:
+                    break
+                time.sleep(BACKOFF_SECONDS[min(failures - 1, len(BACKOFF_SECONDS) - 1)])
+            else:
                 break
-            time.sleep(BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS) - 1)])
     assert last is not None
     raise last
 
@@ -110,7 +133,7 @@ def _run_one(plan: Plan, job: Job) -> None:
     job.model = result.model
     job.latency_ms = result.latency_ms
     job.neurons = neurons
-    job.estimate = make_estimate(job.tier, actual_neurons=result.neurons)
+    job.estimate = make_estimate(job.tier, actual_neurons=result.neurons, actual_seconds=result.latency_ms / 1000.0)
     job.status = JobStatus.completed
 
 

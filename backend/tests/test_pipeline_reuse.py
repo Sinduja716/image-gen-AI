@@ -98,3 +98,31 @@ def test_budget_blocks_and_records(client, monkeypatch):
     done = [j for j in p.jobs if j.status == JobStatus.completed]
     blocked = [j for j in p.jobs if j.error_code == "budget"]
     assert done and blocked and budget.used_today() <= 100
+
+
+def test_filter_false_positives_are_retried_with_a_different_prompt(client, monkeypatch):
+    prompts = []
+
+    class Flaky(Fake):
+        def generate(self, prompt, steps):
+            prompts.append(prompt)
+            self.calls += 1
+            if self.calls <= 3:
+                raise ProviderError("filtered")
+            return ProviderResult(_png(), "image/png", "fake", steps, 1, None)
+
+    flaky = Flaky()
+    p = _plan(client, monkeypatch, flaky)
+    p.jobs = p.jobs[:1]
+    job_runner.run_plan(p.plan_id)
+    assert p.jobs[0].status == JobStatus.completed and p.jobs[0].attempts == 4
+    assert len(set(prompts)) == 4  # each retry used a different wording
+
+
+def test_filter_gives_up_after_bounded_retries(client, monkeypatch):
+    always = Fake(fail_times=99, code="filtered")
+    p = _plan(client, monkeypatch, always)
+    p.jobs = p.jobs[:1]
+    job_runner.run_plan(p.plan_id)
+    assert p.jobs[0].status == JobStatus.failed and p.jobs[0].error_code == "filtered"
+    assert always.calls == job_runner.FILTER_RETRIES + 1

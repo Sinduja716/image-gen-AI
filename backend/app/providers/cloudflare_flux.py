@@ -42,6 +42,8 @@ def _extract_image(resp: httpx.Response) -> bytes:
         errors = body.get("errors") or []
         msg = "; ".join(str(e.get("message", e)) if isinstance(e, dict) else str(e) for e in errors)
         low = msg.lower()
+        if "nsfw" in low or any(isinstance(e, dict) and e.get("code") == 8007 for e in errors):
+            raise ProviderError("filtered", msg or "prompt rejected by Cloudflare's content filter")
         code = "quota" if ("limit" in low or "quota" in low or "neuron" in low) else "bad_request"
         raise ProviderError(code, msg or "Cloudflare reported failure")
     result = body.get("result", body) if isinstance(body, dict) else body
@@ -93,6 +95,9 @@ class CloudflareFluxProvider:
                 detail = resp.json()
             except ValueError:
                 detail = resp.text[:200]
+            text = str(detail).lower()
+            if "nsfw" in text or "'code': 8007" in text:  # flaky false positives on harmless prompts
+                raise ProviderError("filtered", f"{resp.status_code}: {detail}")
             raise ProviderError("bad_request", f"{resp.status_code}: {detail}")
 
         data = _extract_image(resp)
