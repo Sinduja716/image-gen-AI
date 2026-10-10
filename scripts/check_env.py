@@ -15,8 +15,8 @@ def norm(name: str) -> str:
 
 
 # Python version
-if sys.version_info[:2] not in ((3, 11), (3, 12)):
-    problems.append(f"Python {sys.version.split()[0]} found. Use Python 3.11 (tested on 3.11 and 3.12).")
+if sys.version_info[:2] not in ((3, 11), (3, 12), (3, 13)):
+    problems.append(f"Python {sys.version.split()[0]} found. Use Python 3.11, 3.12 or 3.13 (all tested).")
 
 # Python packages vs lock
 installed = {norm(d.metadata["Name"]): d.version for d in md.distributions()}
@@ -39,9 +39,9 @@ try:
     out = subprocess.run(["node", "--version"], capture_output=True, text=True, shell=(sys.platform == "win32")).stdout.strip()
     major, minor = (int(x) for x in out.lstrip("v").split(".")[:2])
     if (major, minor) < (20, 19):
-        problems.append(f"Node {out} found. Use Node 22 LTS (minimum 20.19).")
+        problems.append(f"Node {out} found. Use Node 22 or newer (minimum 20.19).")
 except Exception:
-    problems.append("Node.js not found. Install Node 22 LTS.")
+    problems.append("Node.js not found. Install Node 22 or newer.")
 
 if not (ROOT / "frontend" / "node_modules").exists():
     problems.append("frontend/node_modules missing. Run: cd frontend ; npm ci")

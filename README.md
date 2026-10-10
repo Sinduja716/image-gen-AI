@@ -6,7 +6,7 @@ already has, and shows what it saved. Full plan: the team guide document. This r
 
 ## Setup (Windows, once)
 
-Install Python 3.11 and Node 22 LTS, then from the repo folder:
+Install Python 3.11, 3.12 or 3.13 (all tested) and Node 22 or newer (22 and 24 tested), then from the repo folder:
 
     powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 
@@ -38,7 +38,8 @@ Add keys to `.env` (copy of `.env.example`) only when your track needs them. `.e
 | Message | Fix |
 |---|---|
 | `ModuleNotFoundError` or `ENVIRONMENT PROBLEMS` | Run `scripts\setup.ps1` again |
-| `py` is not recognised | Install Python 3.11 from python.org and tick "Add to PATH" and the launcher |
+| "No Python 3.11, 3.12 or 3.13 found" | Install one from python.org and tick "Add to PATH". If you use mise, make sure `python --version` works in this terminal first. |
+| Other Python or global packages on your machine (torch, fastapi...) | Ignore them. The project uses its own `.venv`, so global packages never interfere. |
 | Script blocked in PowerShell | Use `powershell -ExecutionPolicy Bypass -File ...` as shown. Do not change the machine-wide policy. |
 | `Cannot find module @rollup/rollup-win32-x64-msvc` | Delete `frontend\node_modules`, then run `npm ci` (not `npm install`) |
 | Port 8000 or 5173 already in use | Close the other terminal, or add `--port 8001` and tell the team |

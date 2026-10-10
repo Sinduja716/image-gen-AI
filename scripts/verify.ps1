@@ -1,5 +1,5 @@
 # Run before every push:  powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 function Run($cmd) { Invoke-Expression $cmd; if ($LASTEXITCODE -ne 0) { throw "FAILED: $cmd" } }

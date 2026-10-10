@@ -49,8 +49,6 @@
     ".env.example",
     ".gitignore",
     ".gitattributes",
-    ".python-version",
-    ".nvmrc",
     "scripts/check_env.py",
     "scripts/setup.ps1",
     "scripts/verify.ps1",
