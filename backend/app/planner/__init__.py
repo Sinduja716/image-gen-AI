@@ -2,16 +2,18 @@
 
 Contract: make_plan(request) -> Plan. Must return one Job per page, in order, with unique job_ids,
 every resolved field marked user/planner/default, and warnings for anything the teacher should check.
-This stub only uses button defaults so the rest of the app runs from day one.
-Replace the body, keep the function name and signature.
 """
 from __future__ import annotations
 
+import json
+import re
 import uuid
+from pathlib import Path
 
 from app.estimate import TIER_STEPS, make_estimate
 from app.planner.defaults import DEFAULTS
 from app.schemas import GenerationRequest, Job, MaterialType, Plan, ResolvedField
+
 
 _KEYWORDS = [
     ("poster", MaterialType.poster), ("colouring", MaterialType.colouring), ("coloring", MaterialType.colouring),
@@ -20,28 +22,87 @@ _KEYWORDS = [
     ("avatar", MaterialType.thumbnail), ("draft", MaterialType.thumbnail),
 ]
 
+def _load_wordlists() -> dict[str, list[str]]:
+    path = Path(__file__).parent.parent.parent.parent / "data" / "wordlists.json"
+    if path.exists():
+        return json.loads(path.read_text())
+    return {}
+
+WORDLISTS = _load_wordlists()
 
 def resolve_purpose(req: GenerationRequest) -> tuple[MaterialType, list[str]]:
-    """Stub: keyword guess for the `auto` button. TRACK 1: replace with rules + the AI planner, keep the signature."""
-    if req.material_type != MaterialType.auto:
-        return req.material_type, []
-    text = req.prompt.lower()
+    """Rule-based purpose resolution."""
+    warnings = []
+
+    # Check for conflicts in the prompt against explicitly chosen material_type
+    prompt_lower = req.prompt.lower()
+    inferred_purpose = None
     for word, purpose in _KEYWORDS:
-        if word in text:
-            return purpose, [f"Purpose chosen automatically: {purpose.value}."]
+        if word in prompt_lower:
+            inferred_purpose = purpose
+            break
+
+    if req.material_type != MaterialType.auto:
+        if inferred_purpose and inferred_purpose != req.material_type:
+            warnings.append(f"Prompt mentions {inferred_purpose.value} but {req.material_type.value} was selected.")
+        return req.material_type, warnings
+
+    if inferred_purpose:
+        return inferred_purpose, [f"Purpose chosen automatically: {inferred_purpose.value}."]
+
     return MaterialType.worksheet, ["Purpose guessed (worksheet). Pick a button if that is wrong."]
 
+def parse_count_and_subjects(prompt: str) -> tuple[int | None, list[str] | None, str | None]:
+    prompt_lower = prompt.lower()
+
+    # Check "a to z"
+    if "a to z" in prompt_lower:
+        for category, items in WORDLISTS.items():
+            if category in prompt_lower and len(items) == 26:
+                return 26, items, category
+        if "animals" in prompt_lower and "animals" in WORDLISTS:
+             return 26, WORDLISTS["animals"], "animals"
+        return 26, None, None
+
+    # Check "1 to 10"
+    if "1 to 10" in prompt_lower:
+        for category, items in WORDLISTS.items():
+            if category in prompt_lower:
+                return 10, items[:10], category
+        if "numbers" in WORDLISTS:
+            return 10, WORDLISTS["numbers"], "numbers"
+        return 10, None, None
+
+    # Check explicit count e.g. "5 animals"
+    match = re.search(r'\b(\d+)\s+([a-z]+)\b', prompt_lower)
+    if match:
+        count = int(match.group(1))
+        category = match.group(2)
+        if category in WORDLISTS:
+            return count, WORDLISTS[category][:count], category
+        return count, None, None
+
+    return None, None, None
 
 def make_plan(req: GenerationRequest) -> Plan:
     purpose, warnings = resolve_purpose(req)
     d = DEFAULTS[purpose]
     resolved: dict[str, ResolvedField] = {}
 
+    # Determine counts and subjects from prompt via planner rules
+    planner_count, subjects, category = parse_count_and_subjects(req.prompt)
+
     wanted = req.overrides.count if req.overrides and req.overrides.count else None
+
     if wanted:
         count = min(wanted, d.max_count)
         resolved["count"] = ResolvedField(value=count, source="user")
         if wanted > d.max_count:
+            warnings.append(f"Count reduced to the maximum of {d.max_count}.")
+    elif planner_count:
+        count = min(planner_count, d.max_count)
+        resolved["count"] = ResolvedField(value=count, source="planner")
+        if planner_count > d.max_count:
             warnings.append(f"Count reduced to the maximum of {d.max_count}.")
     else:
         count = d.count
@@ -61,19 +122,27 @@ def make_plan(req: GenerationRequest) -> Plan:
     steps = TIER_STEPS[tier]
 
     plan_id = uuid.uuid4().hex[:12]
-    jobs = [
-        Job(
+    jobs = []
+
+    for i in range(1, count + 1):
+        if subjects and i - 1 < len(subjects) and category:
+            item_key = f"{category}:{subjects[i-1]}"
+            job_prompt = f"{req.prompt} ({subjects[i-1]})"
+        else:
+            item_key = f"general:item-{i}"
+            job_prompt = f"{req.prompt} (item {i})"
+
+        jobs.append(Job(
             job_id=f"{plan_id}-{i:02d}",
             plan_id=plan_id,
             sequence=i,
-            item_key=f"item-{i}",
-            prompt=f"{req.prompt} (item {i})",
+            item_key=item_key,
+            prompt=job_prompt,
             steps=steps,
             tier=tier,  # type: ignore[arg-type]
             estimate=estimate,
-        )
-        for i in range(1, count + 1)
-    ]
+        ))
+
     return Plan(
         plan_id=plan_id,
         material_type=purpose,
