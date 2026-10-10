@@ -9,13 +9,32 @@ from __future__ import annotations
 
 import uuid
 
+from app.estimate import TIER_STEPS, make_estimate
 from app.planner.defaults import DEFAULTS
-from app.schemas import GenerationRequest, Job, Plan, ResolvedField
+from app.schemas import GenerationRequest, Job, MaterialType, Plan, ResolvedField
+
+_KEYWORDS = [
+    ("poster", MaterialType.poster), ("colouring", MaterialType.colouring), ("coloring", MaterialType.colouring),
+    ("flashcard", MaterialType.flashcards), ("worksheet", MaterialType.worksheet),
+    ("thumbnail", MaterialType.thumbnail), ("icon", MaterialType.thumbnail),
+    ("avatar", MaterialType.thumbnail), ("draft", MaterialType.thumbnail),
+]
+
+
+def resolve_purpose(req: GenerationRequest) -> tuple[MaterialType, list[str]]:
+    """Stub: keyword guess for the `auto` button. TRACK 1: replace with rules + the AI planner, keep the signature."""
+    if req.material_type != MaterialType.auto:
+        return req.material_type, []
+    text = req.prompt.lower()
+    for word, purpose in _KEYWORDS:
+        if word in text:
+            return purpose, [f"Purpose chosen automatically: {purpose.value}."]
+    return MaterialType.worksheet, ["Purpose guessed (worksheet). Pick a button if that is wrong."]
 
 
 def make_plan(req: GenerationRequest) -> Plan:
-    d = DEFAULTS[req.material_type]
-    warnings: list[str] = []
+    purpose, warnings = resolve_purpose(req)
+    d = DEFAULTS[purpose]
     resolved: dict[str, ResolvedField] = {}
 
     wanted = req.overrides.count if req.overrides and req.overrides.count else None
@@ -34,6 +53,13 @@ def make_plan(req: GenerationRequest) -> Plan:
     resolved["language"] = ResolvedField(value=lang or "en", source="user" if lang else "default")
     resolved["style"] = ResolvedField(value="simple_outline", source="default")
 
+    manual = req.overrides.tier if req.overrides and req.overrides.tier else None
+    tier = manual or d.tier
+    reason = "Chosen by you." if manual else d.reason
+    resolved["tier"] = ResolvedField(value=tier, source="user" if manual else "default")
+    estimate = make_estimate(tier)  # type: ignore[arg-type]
+    steps = TIER_STEPS[tier]
+
     plan_id = uuid.uuid4().hex[:12]
     jobs = [
         Job(
@@ -42,17 +68,22 @@ def make_plan(req: GenerationRequest) -> Plan:
             sequence=i,
             item_key=f"item-{i}",
             prompt=f"{req.prompt} (item {i})",
-            steps=d.steps,
+            steps=steps,
+            tier=tier,  # type: ignore[arg-type]
+            estimate=estimate,
         )
         for i in range(1, count + 1)
     ]
     return Plan(
         plan_id=plan_id,
-        material_type=req.material_type,
+        material_type=purpose,
         original_prompt=req.prompt,
         page_format=d.page_format,  # type: ignore[arg-type]
         profile=d.profile,
-        steps=d.steps,
+        steps=steps,
+        tier=tier,  # type: ignore[arg-type]
+        tier_reason=reason,
+        estimate=estimate,
         resolved=resolved,
         warnings=warnings,
         jobs=jobs,

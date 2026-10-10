@@ -56,11 +56,14 @@
  "GenerationRequest": {
   "$defs": {
    "MaterialType": {
+    "description": "The PURPOSE of the image. `auto` means the system decides; a Plan never keeps `auto`.",
     "enum": [
      "colouring",
      "worksheet",
      "flashcards",
-     "poster"
+     "poster",
+     "thumbnail",
+     "auto"
     ],
     "title": "MaterialType",
     "type": "string"
@@ -105,6 +108,23 @@
       ],
       "default": null,
       "title": "Language"
+     },
+     "tier": {
+      "anyOf": [
+       {
+        "enum": [
+         "draft",
+         "standard",
+         "high"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Tier"
      }
     },
     "title": "Overrides",
@@ -151,6 +171,101 @@
     ],
     "title": "JobStatus",
     "type": "string"
+   },
+   "ResourceEstimate": {
+    "description": "Compute estimate for ONE image, next to what maximum quality would have cost.\nBuilt only by app/estimate.py so every track shows identical numbers.",
+    "properties": {
+     "cost_usd": {
+      "title": "Cost Usd",
+      "type": "number"
+     },
+     "energy_wh": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Energy Wh"
+     },
+     "max_cost_usd": {
+      "title": "Max Cost Usd",
+      "type": "number"
+     },
+     "max_energy_wh": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Energy Wh"
+     },
+     "max_neurons": {
+      "title": "Max Neurons",
+      "type": "number"
+     },
+     "max_steps": {
+      "title": "Max Steps",
+      "type": "integer"
+     },
+     "measured": {
+      "title": "Measured",
+      "type": "boolean"
+     },
+     "neurons": {
+      "title": "Neurons",
+      "type": "number"
+     },
+     "notes": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+     },
+     "placeholder": {
+      "title": "Placeholder",
+      "type": "boolean"
+     },
+     "saving_percent": {
+      "title": "Saving Percent",
+      "type": "number"
+     },
+     "steps": {
+      "title": "Steps",
+      "type": "integer"
+     },
+     "tier": {
+      "enum": [
+       "draft",
+       "standard",
+       "high"
+      ],
+      "title": "Tier",
+      "type": "string"
+     }
+    },
+    "required": [
+     "tier",
+     "steps",
+     "neurons",
+     "cost_usd",
+     "max_steps",
+     "max_neurons",
+     "max_cost_usd",
+     "saving_percent",
+     "measured",
+     "placeholder"
+    ],
+    "title": "ResourceEstimate",
+    "type": "object"
    }
   },
   "properties": {
@@ -187,6 +302,17 @@
     ],
     "default": null,
     "title": "Error Code"
+   },
+   "estimate": {
+    "anyOf": [
+     {
+      "$ref": "#/$defs/ResourceEstimate"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null
    },
    "item_key": {
     "title": "Item Key",
@@ -264,6 +390,16 @@
     "default": 4,
     "title": "Steps",
     "type": "integer"
+   },
+   "tier": {
+    "default": "standard",
+    "enum": [
+     "draft",
+     "standard",
+     "high"
+    ],
+    "title": "Tier",
+    "type": "string"
    }
   },
   "required": [
@@ -290,6 +426,18 @@
     "default": null,
     "title": "Baseline Cost Usd"
    },
+   "baseline_energy_wh": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Baseline Energy Wh"
+   },
    "baseline_neurons": {
     "anyOf": [
      {
@@ -305,6 +453,30 @@
    "cache_hits": {
     "title": "Cache Hits",
     "type": "integer"
+   },
+   "energy_saved_wh": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Energy Saved Wh"
+   },
+   "energy_wh_used": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Energy Wh Used"
    },
    "estimated_cost_usd": {
     "anyOf": [
@@ -356,6 +528,13 @@
     ],
     "default": null,
     "title": "Saving Percent"
+   },
+   "tier_counts": {
+    "additionalProperties": {
+     "type": "integer"
+    },
+    "title": "Tier Counts",
+    "type": "object"
    }
   },
   "required": [
@@ -406,6 +585,23 @@
     ],
     "default": null,
     "title": "Language"
+   },
+   "tier": {
+    "anyOf": [
+     {
+      "enum": [
+       "draft",
+       "standard",
+       "high"
+      ],
+      "type": "string"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Tier"
    }
   },
   "title": "Overrides",
@@ -449,6 +645,17 @@
       "default": null,
       "title": "Error Code"
      },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ResourceEstimate"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
      "item_key": {
       "title": "Item Key",
       "type": "string"
@@ -525,6 +732,16 @@
       "default": 4,
       "title": "Steps",
       "type": "integer"
+     },
+     "tier": {
+      "default": "standard",
+      "enum": [
+       "draft",
+       "standard",
+       "high"
+      ],
+      "title": "Tier",
+      "type": "string"
      }
     },
     "required": [
@@ -548,11 +765,14 @@
     "type": "string"
    },
    "MaterialType": {
+    "description": "The PURPOSE of the image. `auto` means the system decides; a Plan never keeps `auto`.",
     "enum": [
      "colouring",
      "worksheet",
      "flashcards",
-     "poster"
+     "poster",
+     "thumbnail",
+     "auto"
     ],
     "title": "MaterialType",
     "type": "string"
@@ -587,9 +807,107 @@
     ],
     "title": "ResolvedField",
     "type": "object"
+   },
+   "ResourceEstimate": {
+    "description": "Compute estimate for ONE image, next to what maximum quality would have cost.\nBuilt only by app/estimate.py so every track shows identical numbers.",
+    "properties": {
+     "cost_usd": {
+      "title": "Cost Usd",
+      "type": "number"
+     },
+     "energy_wh": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Energy Wh"
+     },
+     "max_cost_usd": {
+      "title": "Max Cost Usd",
+      "type": "number"
+     },
+     "max_energy_wh": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Energy Wh"
+     },
+     "max_neurons": {
+      "title": "Max Neurons",
+      "type": "number"
+     },
+     "max_steps": {
+      "title": "Max Steps",
+      "type": "integer"
+     },
+     "measured": {
+      "title": "Measured",
+      "type": "boolean"
+     },
+     "neurons": {
+      "title": "Neurons",
+      "type": "number"
+     },
+     "notes": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+     },
+     "placeholder": {
+      "title": "Placeholder",
+      "type": "boolean"
+     },
+     "saving_percent": {
+      "title": "Saving Percent",
+      "type": "number"
+     },
+     "steps": {
+      "title": "Steps",
+      "type": "integer"
+     },
+     "tier": {
+      "enum": [
+       "draft",
+       "standard",
+       "high"
+      ],
+      "title": "Tier",
+      "type": "string"
+     }
+    },
+    "required": [
+     "tier",
+     "steps",
+     "neurons",
+     "cost_usd",
+     "max_steps",
+     "max_neurons",
+     "max_cost_usd",
+     "saving_percent",
+     "measured",
+     "placeholder"
+    ],
+    "title": "ResourceEstimate",
+    "type": "object"
    }
   },
   "properties": {
+   "estimate": {
+    "$ref": "#/$defs/ResourceEstimate"
+   },
    "jobs": {
     "items": {
      "$ref": "#/$defs/Job"
@@ -608,7 +926,8 @@
     "enum": [
      "A4_PORTRAIT",
      "A3_PORTRAIT",
-     "CARD_3X5"
+     "CARD_3X5",
+     "SQUARE_SMALL"
     ],
     "title": "Page Format",
     "type": "string"
@@ -632,6 +951,19 @@
     "title": "Steps",
     "type": "integer"
    },
+   "tier": {
+    "enum": [
+     "draft",
+     "standard",
+     "high"
+    ],
+    "title": "Tier",
+    "type": "string"
+   },
+   "tier_reason": {
+    "title": "Tier Reason",
+    "type": "string"
+   },
    "warnings": {
     "items": {
      "type": "string"
@@ -647,6 +979,9 @@
    "page_format",
    "profile",
    "steps",
+   "tier",
+   "tier_reason",
+   "estimate",
    "resolved",
    "jobs"
   ],
@@ -682,6 +1017,101 @@
    "source"
   ],
   "title": "ResolvedField",
+  "type": "object"
+ },
+ "ResourceEstimate": {
+  "description": "Compute estimate for ONE image, next to what maximum quality would have cost.\nBuilt only by app/estimate.py so every track shows identical numbers.",
+  "properties": {
+   "cost_usd": {
+    "title": "Cost Usd",
+    "type": "number"
+   },
+   "energy_wh": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Energy Wh"
+   },
+   "max_cost_usd": {
+    "title": "Max Cost Usd",
+    "type": "number"
+   },
+   "max_energy_wh": {
+    "anyOf": [
+     {
+      "type": "number"
+     },
+     {
+      "type": "null"
+     }
+    ],
+    "default": null,
+    "title": "Max Energy Wh"
+   },
+   "max_neurons": {
+    "title": "Max Neurons",
+    "type": "number"
+   },
+   "max_steps": {
+    "title": "Max Steps",
+    "type": "integer"
+   },
+   "measured": {
+    "title": "Measured",
+    "type": "boolean"
+   },
+   "neurons": {
+    "title": "Neurons",
+    "type": "number"
+   },
+   "notes": {
+    "items": {
+     "type": "string"
+    },
+    "title": "Notes",
+    "type": "array"
+   },
+   "placeholder": {
+    "title": "Placeholder",
+    "type": "boolean"
+   },
+   "saving_percent": {
+    "title": "Saving Percent",
+    "type": "number"
+   },
+   "steps": {
+    "title": "Steps",
+    "type": "integer"
+   },
+   "tier": {
+    "enum": [
+     "draft",
+     "standard",
+     "high"
+    ],
+    "title": "Tier",
+    "type": "string"
+   }
+  },
+  "required": [
+   "tier",
+   "steps",
+   "neurons",
+   "cost_usd",
+   "max_steps",
+   "max_neurons",
+   "max_cost_usd",
+   "saving_percent",
+   "measured",
+   "placeholder"
+  ],
+  "title": "ResourceEstimate",
   "type": "object"
  },
  "StatusResponse": {
@@ -722,6 +1152,17 @@
       "default": null,
       "title": "Error Code"
      },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ResourceEstimate"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
      "item_key": {
       "title": "Item Key",
       "type": "string"
@@ -798,6 +1239,16 @@
       "default": 4,
       "title": "Steps",
       "type": "integer"
+     },
+     "tier": {
+      "default": "standard",
+      "enum": [
+       "draft",
+       "standard",
+       "high"
+      ],
+      "title": "Tier",
+      "type": "string"
      }
     },
     "required": [
@@ -819,6 +1270,101 @@
     ],
     "title": "JobStatus",
     "type": "string"
+   },
+   "ResourceEstimate": {
+    "description": "Compute estimate for ONE image, next to what maximum quality would have cost.\nBuilt only by app/estimate.py so every track shows identical numbers.",
+    "properties": {
+     "cost_usd": {
+      "title": "Cost Usd",
+      "type": "number"
+     },
+     "energy_wh": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Energy Wh"
+     },
+     "max_cost_usd": {
+      "title": "Max Cost Usd",
+      "type": "number"
+     },
+     "max_energy_wh": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Energy Wh"
+     },
+     "max_neurons": {
+      "title": "Max Neurons",
+      "type": "number"
+     },
+     "max_steps": {
+      "title": "Max Steps",
+      "type": "integer"
+     },
+     "measured": {
+      "title": "Measured",
+      "type": "boolean"
+     },
+     "neurons": {
+      "title": "Neurons",
+      "type": "number"
+     },
+     "notes": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+     },
+     "placeholder": {
+      "title": "Placeholder",
+      "type": "boolean"
+     },
+     "saving_percent": {
+      "title": "Saving Percent",
+      "type": "number"
+     },
+     "steps": {
+      "title": "Steps",
+      "type": "integer"
+     },
+     "tier": {
+      "enum": [
+       "draft",
+       "standard",
+       "high"
+      ],
+      "title": "Tier",
+      "type": "string"
+     }
+    },
+    "required": [
+     "tier",
+     "steps",
+     "neurons",
+     "cost_usd",
+     "max_steps",
+     "max_neurons",
+     "max_cost_usd",
+     "saving_percent",
+     "measured",
+     "placeholder"
+    ],
+    "title": "ResourceEstimate",
+    "type": "object"
    }
   },
   "properties": {

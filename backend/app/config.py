@@ -15,6 +15,14 @@ def _int(name: str, default: int) -> int:
         return default
 
 
+def _float_or_none(name: str):
+    raw = os.environ.get(name, "").strip()
+    try:
+        return float(raw) if raw else None
+    except ValueError:
+        return None
+
+
 class Settings:
     image_provider: str = os.environ.get("IMAGE_PROVIDER", "mock")
     cloudflare_account_id: str = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
@@ -25,6 +33,8 @@ class Settings:
     max_concurrent_jobs: int = _int("MAX_CONCURRENT_IMAGE_JOBS", 2)
     max_retries: int = _int("MAX_IMAGE_RETRIES", 2)
     request_timeout: int = _int("REQUEST_TIMEOUT_SECONDS", 60)
+    # Optional, illustrative: watt-hours per 1,000 neurons. Leave empty to show relative compute only.
+    energy_wh_per_1000_neurons = _float_or_none("ENERGY_WH_PER_1000_NEURONS")
     outputs_dir: Path = ROOT / "outputs"
     library_dir: Path = ROOT / "data" / "library"
     data_dir: Path = ROOT / "data"

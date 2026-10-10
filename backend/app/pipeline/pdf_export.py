@@ -13,7 +13,7 @@ from reportlab.pdfgen import canvas
 from app.config import settings
 from app.schemas import JobStatus, Plan
 
-PAGE_SIZES = {"A4_PORTRAIT": A4, "A3_PORTRAIT": A3, "CARD_3X5": (3 * inch, 5 * inch)}
+PAGE_SIZES = {"A4_PORTRAIT": A4, "A3_PORTRAIT": A3, "CARD_3X5": (3 * inch, 5 * inch), "SQUARE_SMALL": (4 * inch, 4 * inch)}
 
 
 def build_pdf(plan: Plan) -> Path:

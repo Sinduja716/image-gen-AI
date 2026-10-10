@@ -26,3 +26,14 @@ Only the integrator changes them. `backend/tests/test_contract_snapshot.py` fail
 - Provider names, keys and prices never reach the frontend except through `Job.provider` and `Job.model` as text.
 - Estimated numbers are labelled in `MetricsResponse.notes`.
 - Planner, provider and pipeline code talk through the functions named in each file's header comment.
+
+## Quality tiers and resource estimates (added for the released problem statement)
+
+- A request is for a PURPOSE (`material_type`): colouring, worksheet, flashcards, poster, thumbnail, or `auto`.
+  The planner turns the purpose into a TIER: `draft` (2 steps), `standard` (4), `high` (8). A Plan never keeps `auto`.
+- The teacher may override the tier with `overrides.tier`.
+- `Plan.estimate` is the estimate for one image BEFORE generating; `Job.estimate` is updated with the real reading
+  AFTER generating. Both are built only by `app/estimate.py`, never by hand.
+- Each estimate carries what maximum quality would have used and `saving_percent`. A reused page has 100%.
+- Energy in watt-hours appears only if `ENERGY_WH_PER_1000_NEURONS` is set. Otherwise show relative compute only.
+- Always show `estimate.notes` and mark values with `placeholder: true` as "placeholder".

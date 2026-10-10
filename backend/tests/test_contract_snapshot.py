@@ -5,7 +5,7 @@ from pathlib import Path
 from app import schemas
 
 SNAPSHOT = Path(__file__).parent / "contract_snapshot.json"
-MODELS = ["Overrides", "GenerationRequest", "ResolvedField", "Job", "Plan", "StatusResponse",
+MODELS = ["Overrides", "GenerationRequest", "ResolvedField", "ResourceEstimate", "Job", "Plan", "StatusResponse",
           "GenerateResponse", "ExportResponse", "MetricsResponse", "ErrorResponse"]
 
 

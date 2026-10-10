@@ -21,6 +21,7 @@ def test_full_flow(client):
 
     m = client.get(f"/api/v1/plans/{plan['plan_id']}/metrics")
     assert m.status_code == 200
+    assert m.json()["saving_percent"] is not None
 
 
 def test_export_blocked_until_complete(client):

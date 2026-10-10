@@ -12,10 +12,17 @@ from pydantic import BaseModel, Field
 
 
 class MaterialType(str, Enum):
+    """The PURPOSE of the image. `auto` means the system decides; a Plan never keeps `auto`."""
+
     colouring = "colouring"
     worksheet = "worksheet"
     flashcards = "flashcards"
     poster = "poster"
+    thumbnail = "thumbnail"
+    auto = "auto"
+
+
+Tier = Literal["draft", "standard", "high"]
 
 
 class JobStatus(str, Enum):
@@ -25,7 +32,7 @@ class JobStatus(str, Enum):
     failed = "failed"
 
 
-PageFormat = Literal["A4_PORTRAIT", "A3_PORTRAIT", "CARD_3X5"]
+PageFormat = Literal["A4_PORTRAIT", "A3_PORTRAIT", "CARD_3X5", "SQUARE_SMALL"]
 
 
 class Overrides(BaseModel):
@@ -34,6 +41,7 @@ class Overrides(BaseModel):
     count: int | None = Field(default=None, ge=1, le=30)
     age_band: str | None = None
     language: str | None = None
+    tier: Tier | None = None  # manual quality tier; None = let the system choose
 
 
 class GenerationRequest(BaseModel):
@@ -49,6 +57,25 @@ class ResolvedField(BaseModel):
     source: Literal["user", "planner", "default"]
 
 
+class ResourceEstimate(BaseModel):
+    """Compute estimate for ONE image, next to what maximum quality would have cost.
+    Built only by app/estimate.py so every track shows identical numbers."""
+
+    tier: Tier
+    steps: int
+    neurons: float
+    cost_usd: float
+    energy_wh: float | None = None  # only when an energy assumption is configured
+    max_steps: int
+    max_neurons: float
+    max_cost_usd: float
+    max_energy_wh: float | None = None
+    saving_percent: float  # compute saved versus maximum quality, 0-100
+    measured: bool  # True when `neurons` came from a real provider reading
+    placeholder: bool  # True while the neuron table is not yet measured
+    notes: list[str] = Field(default_factory=list)
+
+
 class Job(BaseModel):
     job_id: str
     plan_id: str
@@ -58,6 +85,8 @@ class Job(BaseModel):
     status: JobStatus = JobStatus.pending
     attempts: int = 0
     steps: int = 4
+    tier: Tier = "standard"
+    estimate: ResourceEstimate | None = None
     asset_uri: str | None = None
     error_code: str | None = None
     cache_hit: bool = False
@@ -74,6 +103,9 @@ class Plan(BaseModel):
     page_format: PageFormat
     profile: str
     steps: int
+    tier: Tier
+    tier_reason: str
+    estimate: ResourceEstimate
     resolved: dict[str, ResolvedField]
     warnings: list[str] = Field(default_factory=list)
     jobs: list[Job]
@@ -109,6 +141,10 @@ class MetricsResponse(BaseModel):
     baseline_neurons: float | None = None
     baseline_cost_usd: float | None = None
     saving_percent: float | None = None
+    energy_wh_used: float | None = None
+    baseline_energy_wh: float | None = None
+    energy_saved_wh: float | None = None
+    tier_counts: dict[str, int] = Field(default_factory=dict)
     notes: list[str] = Field(default_factory=list)
 
 

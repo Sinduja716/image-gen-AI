@@ -8,6 +8,8 @@ const BUTTONS: { type: MaterialType; label: string }[] = [
   { type: "worksheet", label: "Worksheet" },
   { type: "flashcards", label: "Flashcards" },
   { type: "poster", label: "Poster" },
+  { type: "thumbnail", label: "Thumbnail / icon" },
+  { type: "auto", label: "Let the system decide" },
 ];
 
 export default function App() {

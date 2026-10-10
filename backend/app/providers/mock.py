@@ -6,6 +6,7 @@ import time
 
 from PIL import Image, ImageDraw
 
+from app.estimate import neurons_for_steps
 from app.providers.base import ProviderResult
 
 
@@ -26,5 +27,5 @@ class MockProvider:
             model="mock",
             steps=steps,
             latency_ms=int((time.perf_counter() - start) * 1000),
-            neurons=0.0,
+            neurons=neurons_for_steps(steps),
         )

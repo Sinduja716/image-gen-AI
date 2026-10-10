@@ -45,3 +45,15 @@ Files: `frontend/src/` (except `api/types.ts`), `frontend/public/`, `frontend/in
     powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 
 Both must pass. Then `git push origin track1-planner`.
+
+## Update for the released problem statement
+
+The task: match compute effort to the purpose of the image, and show the user what was saved by not generating
+at maximum quality. Deliverable: at least two quality tiers and a visible resource estimate per generation.
+
+- Track 1: purposes now include `thumbnail` and `auto`; `planner/defaults.py` maps each purpose to a tier with a reason.
+  Replace `resolve_purpose` with rules plus the AI planner. Calibration decides tiers; keep at least two in use.
+- Track 2: `Job.estimate` is set after each generation (already wired in `jobs.py`). Measure
+  `data/library/neurons.json` so estimates stop being placeholders. Reused pages: neurons 0.0.
+- Track 3: show the tier, its reason, and the estimate BEFORE generating, on every finished page, and in the totals.
+  Add a tier selector (auto / draft / standard / high).

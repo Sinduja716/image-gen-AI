@@ -1,12 +1,14 @@
 // Mirrors backend/app/schemas.py. FROZEN: only the integrator changes this file.
-export type MaterialType = "colouring" | "worksheet" | "flashcards" | "poster";
+export type MaterialType = "colouring" | "worksheet" | "flashcards" | "poster" | "thumbnail" | "auto";
+export type Tier = "draft" | "standard" | "high";
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
-export type PageFormat = "A4_PORTRAIT" | "A3_PORTRAIT" | "CARD_3X5";
+export type PageFormat = "A4_PORTRAIT" | "A3_PORTRAIT" | "CARD_3X5" | "SQUARE_SMALL";
 
 export interface Overrides {
   count?: number | null;
   age_band?: string | null;
   language?: string | null;
+  tier?: Tier | null;
 }
 export interface GenerationRequest {
   material_type: MaterialType;
@@ -17,6 +19,21 @@ export interface ResolvedField {
   value: string | number;
   source: "user" | "planner" | "default";
 }
+export interface ResourceEstimate {
+  tier: Tier;
+  steps: number;
+  neurons: number;
+  cost_usd: number;
+  energy_wh: number | null;
+  max_steps: number;
+  max_neurons: number;
+  max_cost_usd: number;
+  max_energy_wh: number | null;
+  saving_percent: number;
+  measured: boolean;
+  placeholder: boolean;
+  notes: string[];
+}
 export interface Job {
   job_id: string;
   plan_id: string;
@@ -26,6 +43,8 @@ export interface Job {
   status: JobStatus;
   attempts: number;
   steps: number;
+  tier: Tier;
+  estimate: ResourceEstimate | null;
   asset_uri: string | null;
   error_code: string | null;
   cache_hit: boolean;
@@ -41,6 +60,9 @@ export interface Plan {
   page_format: PageFormat;
   profile: string;
   steps: number;
+  tier: Tier;
+  tier_reason: string;
+  estimate: ResourceEstimate;
   resolved: Record<string, ResolvedField>;
   warnings: string[];
   jobs: Job[];
@@ -66,5 +88,9 @@ export interface MetricsResponse {
   baseline_neurons: number | null;
   baseline_cost_usd: number | null;
   saving_percent: number | null;
+  energy_wh_used: number | null;
+  baseline_energy_wh: number | null;
+  energy_saved_wh: number | null;
+  tier_counts: Record<string, number>;
   notes: string[];
 }

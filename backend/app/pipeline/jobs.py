@@ -4,6 +4,7 @@ bounded retries with backoff, budget guard, timeouts, and storing metrics fields
 from __future__ import annotations
 
 from app.config import settings
+from app.estimate import make_estimate
 from app.providers import get_provider
 from app.providers.base import ProviderError
 from app.schemas import Job, JobStatus
@@ -33,6 +34,7 @@ def _run_one(job: Job) -> None:
     job.model = result.model
     job.latency_ms = result.latency_ms
     job.neurons = result.neurons
+    job.estimate = make_estimate(job.tier, actual_neurons=result.neurons)
     job.error_code = None
     job.status = JobStatus.completed
 
