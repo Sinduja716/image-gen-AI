@@ -16,14 +16,32 @@ def compute_metrics(plan: Plan) -> MetricsResponse:
     calls = len(done) - hits
 
     base = make_estimate("high")  # one image at maximum quality
+
     used = 0.0
+    tier_neurons = 0.0
     tiers: dict[str, int] = {}
+
     for j in done:
-        n = j.neurons if j.neurons is not None else (j.estimate.neurons if j.estimate else 0.0)
+        n = 0.0 if j.cache_hit else (j.neurons if j.neurons is not None else (j.estimate.neurons if j.estimate else 0.0))
         used += n
+        tier_neurons += make_estimate(j.tier).neurons
         tiers[j.tier] = tiers.get(j.tier, 0) + 1
+
     baseline = base.max_neurons * len(done)
-    saving = None if baseline <= 0 else round(max(0.0, (1 - used / baseline) * 100), 1)
+
+    saving_percent = None
+    if baseline > 0:
+        saving_percent = round(max(0.0, (1 - used / baseline) * 100), 1)
+
+        tier_savings = baseline - tier_neurons
+        reuse_savings = tier_neurons - used
+
+        tier_pct = round((tier_savings / baseline) * 100, 1)
+        reuse_pct = round((reuse_savings / baseline) * 100, 1)
+
+        split_note = f"Of the {saving_percent}% compute saved, {tier_pct}% comes from choosing lower tiers and {reuse_pct}% from reusing saved images."
+    else:
+        split_note = None
 
     wh = base.max_energy_wh
     energy_used = None if wh is None else round(used / base.max_neurons * wh, 6) if base.max_neurons else None
@@ -33,6 +51,9 @@ def compute_metrics(plan: Plan) -> MetricsResponse:
     notes = list(base.notes) + [
         "Baseline = every page generated fresh at maximum quality (8 steps) with no reuse.",
     ]
+    if split_note:
+        notes.append(split_note)
+
     return MetricsResponse(
         plan_id=plan.plan_id,
         image_calls=calls,
@@ -41,7 +62,7 @@ def compute_metrics(plan: Plan) -> MetricsResponse:
         estimated_cost_usd=round(used / 1000.0 * USD_PER_1000_NEURONS, 6),
         baseline_neurons=round(baseline, 3),
         baseline_cost_usd=round(baseline / 1000.0 * USD_PER_1000_NEURONS, 6),
-        saving_percent=saving,
+        saving_percent=saving_percent,
         energy_wh_used=energy_used,
         baseline_energy_wh=energy_base,
         energy_saved_wh=saved_wh,
