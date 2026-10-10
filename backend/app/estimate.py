@@ -82,7 +82,11 @@ def make_estimate(tier: Tier, actual_neurons: float | None = None, actual_second
         seconds = 0.0
     else:
         seconds = nearest_s
-    time_saving = 0.0 if max_seconds <= 0 else max(0.0, min(100.0, (1 - seconds / max_seconds) * 100))
+    # The time SAVING compares table values (expected seconds at this tier vs at the maximum), never one noisy
+    # real reading against the table: a single slow network round trip must not erase or invent a saving.
+    # `seconds` still shows how long this image really took. A reused page takes no generation time at all.
+    expected = 0.0 if actual_neurons == 0 else nearest_s
+    time_saving = 0.0 if max_seconds <= 0 else max(0.0, min(100.0, (1 - expected / max_seconds) * 100))
     saving = 0.0 if max_neurons <= 0 else max(0.0, min(100.0, (1 - neurons / max_neurons) * 100))
     notes = [f"Cost is an estimate at ${USD_PER_1000_NEURONS} per 1,000 neurons (Cloudflare's paid rate)."]
     if placeholder:
@@ -135,7 +139,7 @@ def explain_method() -> dict:
         "formulas": [
             "cost_usd = neurons / 1000 x 0.011 (Cloudflare's paid rate; free-tier use costs $0, so this is an estimate)",
             "saving_percent = (1 - neurons / neurons_at_8_steps) x 100",
-            "time_saving_percent = (1 - seconds / seconds_at_8_steps) x 100",
+            "time_saving_percent = (1 - expected_seconds_at_this_tier / expected_seconds_at_8_steps) x 100 (from the timing table; the real seconds of each image are shown separately)",
             "reused page: nothing is generated, so neurons = 0, seconds = 0 and saving = 100%",
             "request total saving = 1 - (sum of neurons actually used / (pages x neurons_at_8_steps))",
         ],

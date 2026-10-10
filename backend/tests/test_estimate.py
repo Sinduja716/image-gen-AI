@@ -28,3 +28,9 @@ def test_time_is_a_second_cost_measure():
     assert make_estimate("standard", actual_neurons=0.0).time_saving_percent == 100.0
     assert make_estimate("draft", actual_seconds=0.5).seconds == 0.5
     assert draft.method
+
+
+def test_time_saving_ignores_one_noisy_reading():
+    slow = make_estimate("draft", actual_seconds=15.0)   # a slow network round trip
+    assert slow.seconds == 15.0
+    assert slow.time_saving_percent == make_estimate("draft").time_saving_percent > 0
