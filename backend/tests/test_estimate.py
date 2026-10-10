@@ -18,3 +18,13 @@ def test_estimates_are_labelled():
     est = make_estimate("draft")
     assert est.notes and any("estimate" in n.lower() for n in est.notes)
     assert est.placeholder is True  # until data/library/neurons.json is measured
+
+
+def test_time_is_a_second_cost_measure():
+    draft, high = make_estimate("draft"), make_estimate("high")
+    assert draft.seconds < high.seconds == high.max_seconds
+    assert high.time_saving_percent == 0.0 and draft.time_saving_percent > 0
+    assert make_estimate("standard", actual_neurons=0.0).seconds == 0.0
+    assert make_estimate("standard", actual_neurons=0.0).time_saving_percent == 100.0
+    assert make_estimate("draft", actual_seconds=0.5).seconds == 0.5
+    assert draft.method

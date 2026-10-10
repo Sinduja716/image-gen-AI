@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import routes_jobs, routes_metrics, routes_plans
+from app.api import routes_estimate, routes_jobs, routes_metrics, routes_plans
 
 app = FastAPI(title="EduCreate AI", version="0.1.0")
 app.add_middleware(
@@ -21,3 +21,4 @@ def health() -> dict:
 app.include_router(routes_plans.router)
 app.include_router(routes_jobs.router)
 app.include_router(routes_metrics.router)
+app.include_router(routes_estimate.router)
